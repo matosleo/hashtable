@@ -76,31 +76,32 @@ string HashTable::get(const string key)
     unsigned long index = hash(key);
     HashEntry<string, string>* entry = this->data[index];
     unsigned tam = this->getSize();
-    // cout << "index inicial: " << index << endl;
     
-    if(entry != nullptr && entry->getKey() == key)
+    unsigned n = tam;
+    
+    for(unsigned i = index; i <= n; i++)
     {
-        return entry->getValue();
-    }
-    
-    
-     for(unsigned i = index + 1; i != index; i++)
-    {
+        if(entry == nullptr)
+        {
+            return "";
+        }
+
         if(i >= tam)
         {
-            //cout << "aqui" << endl;
             i = 0;
         }
+        
         entry = this->data[i];
-        if(entry != nullptr && key == entry->getKey())
+        
+        if(entry != ENTRY_DELETED)
         {
-            //cout << "index do if: " << i << endl;
-            return entry->getValue();
+            if(entry->getKey() == key)
+            {
+                return entry->getValue();
+            }
         }
     }
-    
     return "";
-    
 }
 
 /**
@@ -112,7 +113,6 @@ bool HashTable::put(const string key, const string value)
     if(!isFull())
     {
         unsigned long index = hash(key);
-        // cout << "Index no começo: " << index << endl;
         unsigned tam = this->getSize();
         HashEntry<string, string>* entry = this->data[index];
         
@@ -121,18 +121,15 @@ bool HashTable::put(const string key, const string value)
             index++;
             if(key == entry->getKey())
             {
-                // cout << "Atualizou" << endl;
                 entry->setValue(value);
                 return true;
             }
             if(index == tam)
             {
-                // cout << "entrou" << endl;
                 index = 0;
             }
             entry = this->data[index];
         }
-        // cout << "Index no final do while: " << index << endl;
         
         HashEntry<string, string>* newEntry = new HashEntry<string, string>(key, value);
         this->data[index] = newEntry;
@@ -140,7 +137,6 @@ bool HashTable::put(const string key, const string value)
         return true;
     }
     return false;
-    
 }
 
 /**
@@ -153,31 +149,34 @@ bool HashTable::remove(const string key)
     unsigned long index = hash(key);
     HashEntry<string, string>* entry = this->data[index];
     unsigned tam = this->getSize();
-    // cout << "index: " << index << endl;
-    // cout << "tam: " << tam << endl;
-    while(entry == nullptr || entry == ENTRY_DELETED)
-    {
-        index++;
-        if(index == tam)
-        {
-            // cout << "entrou" << endl;
-            index = 0;
-        }
-        // cout << "index incrementado: " << index << endl;
-        entry = this->data[index];
-    }
     
-    if(key == entry->getKey())
+    unsigned n = tam;
+    
+    for(unsigned i = index; i <= n; i++)
     {
-        // cout << "index aqui: " << index << endl;
-        this->data[index] = ENTRY_DELETED;
-        this->quantity--;
-        return true;
+        if(entry == nullptr)
+        {
+            return false;
+        }
+
+        if(i >= tam)
+        {
+            i = 0;
+        }
+       
+        entry = this->data[i];
+        
+        if(entry != ENTRY_DELETED)
+        {
+            if(entry->getKey() == key)
+            {
+                this->data[i] = ENTRY_DELETED;
+                this->quantity--;
+                return true;
+            }
+        }
     }
-
-    // cout << "fuck you" << endl;
     return false;
-
 }
 
 /**
